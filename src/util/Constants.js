@@ -1,6 +1,12 @@
-const Package = exports.Package = require('../../package.json');
-const { Error, RangeError } = require('../errors');
-const browser = exports.browser = typeof window !== 'undefined';
+'use strict';
+
+var Package = exports.Package = require('../../package.json');
+
+var _require = require('../errors'),
+    Error = _require.Error,
+    RangeError = _require.RangeError;
+
+var browser = exports.browser = typeof window !== 'undefined';
 
 /**
  * Options for a client.
@@ -66,9 +72,9 @@ exports.DefaultOptions = {
     properties: {
       $os: browser ? 'browser' : process.platform,
       $browser: 'discord.js',
-      $device: 'discord.js',
+      $device: 'discord.js'
     },
-    version: 6,
+    version: 6
   },
 
   /**
@@ -83,60 +89,95 @@ exports.DefaultOptions = {
     version: 7,
     api: 'https://discordapp.com/api',
     cdn: 'https://cdn.discordapp.com',
-    invite: 'https://discord.gg',
-  },
+    invite: 'https://discord.gg'
+  }
 };
 
-exports.UserAgent = browser ? null :
-  `DiscordBot (${Package.homepage.split('#')[0]}, ${Package.version}) Node.js/${process.version}`;
+exports.UserAgent = browser ? null : 'DiscordBot (' + Package.homepage.split('#')[0] + ', ' + Package.version + ') Node.js/' + process.version;
 
 exports.WSCodes = {
   1000: 'Connection gracefully closed',
   4004: 'Tried to identify with an invalid token',
   4010: 'Sharding data provided was invalid',
-  4011: 'Shard would be on too many guilds if connected',
+  4011: 'Shard would be on too many guilds if connected'
 };
 
-const AllowedImageFormats = [
-  'webp',
-  'png',
-  'jpg',
-  'gif',
-];
+var AllowedImageFormats = ['webp', 'png', 'jpg', 'gif'];
 
-const AllowedImageSizes = Array.from({ length: 8 }, (e, i) => 2 ** (i + 4));
+var AllowedImageSizes = Array.from({ length: 8 }, function (e, i) {
+  return Math.pow(2, i + 4);
+});
 
-function makeImageUrl(root, { format = 'webp', size } = {}) {
+function makeImageUrl(root) {
+  var _ref = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {},
+      _ref$format = _ref.format,
+      format = _ref$format === undefined ? 'webp' : _ref$format,
+      size = _ref.size;
+
   if (format && !AllowedImageFormats.includes(format)) throw new Error('IMAGE_FORMAT', format);
   if (size && !AllowedImageSizes.includes(size)) throw new RangeError('IMAGE_SIZE', size);
-  return `${root}.${format}${size ? `?size=${size}` : ''}`;
+  return root + '.' + format + (size ? '?size=' + size : '');
 }
 
 exports.Endpoints = {
-  CDN(root) {
+  CDN: function CDN(root) {
     return {
-      Emoji: (emojiID, format = 'png') => `${root}/emojis/${emojiID}.${format}`,
-      Asset: name => `${root}/assets/${name}`,
-      DefaultAvatar: number => `${root}/embed/avatars/${number}.png`,
-      Avatar: (userID, hash, format = 'default', size) => {
+      Emoji: function Emoji(emojiID) {
+        var format = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : 'png';
+        return root + '/emojis/' + emojiID + '.' + format;
+      },
+      Asset: function Asset(name) {
+        return root + '/assets/' + name;
+      },
+      DefaultAvatar: function DefaultAvatar(number) {
+        return root + '/embed/avatars/' + number + '.png';
+      },
+      Avatar: function Avatar(userID, hash) {
+        var format = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'default';
+        var size = arguments[3];
+
         if (userID === '1') return hash;
         if (format === 'default') format = hash.startsWith('a_') ? 'gif' : 'webp';
-        return makeImageUrl(`${root}/avatars/${userID}/${hash}`, { format, size });
+        return makeImageUrl(root + '/avatars/' + userID + '/' + hash, { format: format, size: size });
       },
-      Icon: (guildID, hash, format = 'webp', size) =>
-        makeImageUrl(`${root}/icons/${guildID}/${hash}`, { format, size }),
-      AppIcon: (clientID, hash, { format = 'webp', size } = {}) =>
-        makeImageUrl(`${root}/app-icons/${clientID}/${hash}`, { size, format }),
-      AppAsset: (clientID, hash, { format = 'webp', size } = {}) =>
-        makeImageUrl(`${root}/app-assets/${clientID}/${hash}`, { size, format }),
-      GDMIcon: (channelID, hash, format = 'webp', size) =>
-        makeImageUrl(`${root}/channel-icons/${channelID}/${hash}`, { size, format }),
-      Splash: (guildID, hash, format = 'webp', size) =>
-        makeImageUrl(`${root}/splashes/${guildID}/${hash}`, { size, format }),
+      Icon: function Icon(guildID, hash) {
+        var format = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'webp';
+        var size = arguments[3];
+        return makeImageUrl(root + '/icons/' + guildID + '/' + hash, { format: format, size: size });
+      },
+      AppIcon: function AppIcon(clientID, hash) {
+        var _ref2 = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {},
+            _ref2$format = _ref2.format,
+            format = _ref2$format === undefined ? 'webp' : _ref2$format,
+            size = _ref2.size;
+
+        return makeImageUrl(root + '/app-icons/' + clientID + '/' + hash, { size: size, format: format });
+      },
+      AppAsset: function AppAsset(clientID, hash) {
+        var _ref3 = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {},
+            _ref3$format = _ref3.format,
+            format = _ref3$format === undefined ? 'webp' : _ref3$format,
+            size = _ref3.size;
+
+        return makeImageUrl(root + '/app-assets/' + clientID + '/' + hash, { size: size, format: format });
+      },
+      GDMIcon: function GDMIcon(channelID, hash) {
+        var format = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'webp';
+        var size = arguments[3];
+        return makeImageUrl(root + '/channel-icons/' + channelID + '/' + hash, { size: size, format: format });
+      },
+      Splash: function Splash(guildID, hash) {
+        var format = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : 'webp';
+        var size = arguments[3];
+        return makeImageUrl(root + '/splashes/' + guildID + '/' + hash, { size: size, format: format });
+      }
     };
   },
-  invite: (root, code) => `${root}/${code}`,
-  botGateway: '/gateway/bot',
+
+  invite: function invite(root, code) {
+    return root + '/' + code;
+  },
+  botGateway: '/gateway/bot'
 };
 
 /**
@@ -155,7 +196,7 @@ exports.Status = {
   RECONNECTING: 2,
   IDLE: 3,
   NEARLY: 4,
-  DISCONNECTED: 5,
+  DISCONNECTED: 5
 };
 
 /**
@@ -172,7 +213,7 @@ exports.VoiceStatus = {
   CONNECTING: 1,
   AUTHENTICATING: 2,
   RECONNECTING: 3,
-  DISCONNECTED: 4,
+  DISCONNECTED: 4
 };
 
 exports.OPCodes = {
@@ -187,7 +228,7 @@ exports.OPCodes = {
   REQUEST_GUILD_MEMBERS: 8,
   INVALID_SESSION: 9,
   HELLO: 10,
-  HEARTBEAT_ACK: 11,
+  HEARTBEAT_ACK: 11
 };
 
 exports.VoiceOPCodes = {
@@ -196,7 +237,7 @@ exports.VoiceOPCodes = {
   READY: 2,
   HEARTBEAT: 3,
   SESSION_DESCRIPTION: 4,
-  SPEAKING: 5,
+  SPEAKING: 5
 };
 
 exports.Events = {
@@ -247,7 +288,7 @@ exports.Events = {
   RECONNECTING: 'reconnecting',
   ERROR: 'error',
   WARN: 'warn',
-  DEBUG: 'debug',
+  DEBUG: 'debug'
 };
 
 /**
@@ -289,45 +330,7 @@ exports.Events = {
  * * RELATIONSHIP_REMOVE
  * @typedef {string} WSEventType
  */
-exports.WSEvents = keyMirror([
-  'READY',
-  'RESUMED',
-  'GUILD_SYNC',
-  'GUILD_CREATE',
-  'GUILD_DELETE',
-  'GUILD_UPDATE',
-  'GUILD_MEMBER_ADD',
-  'GUILD_MEMBER_REMOVE',
-  'GUILD_MEMBER_UPDATE',
-  'GUILD_MEMBERS_CHUNK',
-  'GUILD_ROLE_CREATE',
-  'GUILD_ROLE_DELETE',
-  'GUILD_ROLE_UPDATE',
-  'GUILD_BAN_ADD',
-  'GUILD_BAN_REMOVE',
-  'GUILD_EMOJIS_UPDATE',
-  'CHANNEL_CREATE',
-  'CHANNEL_DELETE',
-  'CHANNEL_UPDATE',
-  'CHANNEL_PINS_UPDATE',
-  'MESSAGE_CREATE',
-  'MESSAGE_DELETE',
-  'MESSAGE_UPDATE',
-  'MESSAGE_DELETE_BULK',
-  'MESSAGE_REACTION_ADD',
-  'MESSAGE_REACTION_REMOVE',
-  'MESSAGE_REACTION_REMOVE_ALL',
-  'USER_UPDATE',
-  'USER_NOTE_UPDATE',
-  'USER_SETTINGS_UPDATE',
-  'USER_GUILD_SETTINGS_UPDATE',
-  'PRESENCE_UPDATE',
-  'VOICE_STATE_UPDATE',
-  'TYPING_START',
-  'VOICE_SERVER_UPDATE',
-  'RELATIONSHIP_ADD',
-  'RELATIONSHIP_REMOVE',
-]);
+exports.WSEvents = keyMirror(['READY', 'RESUMED', 'GUILD_SYNC', 'GUILD_CREATE', 'GUILD_DELETE', 'GUILD_UPDATE', 'GUILD_MEMBER_ADD', 'GUILD_MEMBER_REMOVE', 'GUILD_MEMBER_UPDATE', 'GUILD_MEMBERS_CHUNK', 'GUILD_ROLE_CREATE', 'GUILD_ROLE_DELETE', 'GUILD_ROLE_UPDATE', 'GUILD_BAN_ADD', 'GUILD_BAN_REMOVE', 'GUILD_EMOJIS_UPDATE', 'CHANNEL_CREATE', 'CHANNEL_DELETE', 'CHANNEL_UPDATE', 'CHANNEL_PINS_UPDATE', 'MESSAGE_CREATE', 'MESSAGE_DELETE', 'MESSAGE_UPDATE', 'MESSAGE_DELETE_BULK', 'MESSAGE_REACTION_ADD', 'MESSAGE_REACTION_REMOVE', 'MESSAGE_REACTION_REMOVE_ALL', 'USER_UPDATE', 'USER_NOTE_UPDATE', 'USER_SETTINGS_UPDATE', 'USER_GUILD_SETTINGS_UPDATE', 'PRESENCE_UPDATE', 'VOICE_STATE_UPDATE', 'TYPING_START', 'VOICE_SERVER_UPDATE', 'RELATIONSHIP_ADD', 'RELATIONSHIP_REMOVE']);
 
 /**
  * The type of a message, e.g. `DEFAULT`. Here are the available types:
@@ -341,16 +344,7 @@ exports.WSEvents = keyMirror([
  * * GUILD_MEMBER_JOIN
  * @typedef {string} MessageType
  */
-exports.MessageTypes = [
-  'DEFAULT',
-  'RECIPIENT_ADD',
-  'RECIPIENT_REMOVE',
-  'CALL',
-  'CHANNEL_NAME_CHANGE',
-  'CHANNEL_ICON_CHANGE',
-  'PINS_ADD',
-  'GUILD_MEMBER_JOIN',
-];
+exports.MessageTypes = ['DEFAULT', 'RECIPIENT_ADD', 'RECIPIENT_REMOVE', 'CALL', 'CHANNEL_NAME_CHANGE', 'CHANNEL_ICON_CHANGE', 'PINS_ADD', 'GUILD_MEMBER_JOIN'];
 
 /**
  * The type of an activity of a users presence, e.g. `PLAYING`. Here are the available types:
@@ -360,12 +354,7 @@ exports.MessageTypes = [
  * * WATCHING
  * @typedef {string} ActivityType
  */
-exports.ActivityTypes = [
-  'PLAYING',
-  'STREAMING',
-  'LISTENING',
-  'WATCHING',
-];
+exports.ActivityTypes = ['PLAYING', 'STREAMING', 'LISTENING', 'WATCHING'];
 
 exports.ActivityFlags = {
   INSTANCE: 1 << 0,
@@ -373,21 +362,12 @@ exports.ActivityFlags = {
   SPECTATE: 1 << 2,
   JOIN_REQUEST: 1 << 3,
   SYNC: 1 << 4,
-  PLAY: 1 << 5,
+  PLAY: 1 << 5
 };
 
-exports.ExplicitContentFilterTypes = [
-  'DISABLED',
-  'NON_FRIENDS',
-  'FRIENDS_AND_NON_FRIENDS',
-];
+exports.ExplicitContentFilterTypes = ['DISABLED', 'NON_FRIENDS', 'FRIENDS_AND_NON_FRIENDS'];
 
-exports.MessageNotificationTypes = [
-  'EVERYTHING',
-  'MENTIONS',
-  'NOTHING',
-  'INHERIT',
-];
+exports.MessageNotificationTypes = ['EVERYTHING', 'MENTIONS', 'NOTHING', 'INHERIT'];
 
 exports.UserSettingsMap = {
   /**
@@ -496,7 +476,8 @@ exports.UserSettingsMap = {
    */
   restricted_guilds: 'restrictedGuilds',
 
-  explicit_content_filter: function explicitContentFilter(type) { // eslint-disable-line func-name-matching
+  explicit_content_filter: function explicitContentFilter(type) {
+    // eslint-disable-line func-name-matching
     /**
      * Safe direct messaging; force people's messages with images to be scanned before they are sent to you.
      * One of `DISABLED`, `NON_FRIENDS`, `FRIENDS_AND_NON_FRIENDS`
@@ -505,7 +486,8 @@ exports.UserSettingsMap = {
      */
     return exports.ExplicitContentFilterTypes[type];
   },
-  friend_source_flags: function friendSources(flags) { // eslint-disable-line func-name-matching
+  friend_source_flags: function friendSources(flags) {
+    // eslint-disable-line func-name-matching
     /**
      * Who can add you as a friend
      * @name ClientUserSettings#friendSources
@@ -517,13 +499,14 @@ exports.UserSettingsMap = {
     return {
       all: flags.all || false,
       mutualGuilds: flags.all ? true : flags.mutual_guilds || false,
-      mutualFriends: flags.all ? true : flags.mutualFriends || false,
+      mutualFriends: flags.all ? true : flags.mutualFriends || false
     };
-  },
+  }
 };
 
 exports.UserGuildSettingsMap = {
-  message_notifications: function messageNotifications(type) { // eslint-disable-line func-name-matching
+  message_notifications: function messageNotifications(type) {
+    // eslint-disable-line func-name-matching
     /**
      * The type of message that should notify you.
      * One of `EVERYTHING`, `MENTIONS`, `NOTHING`
@@ -555,11 +538,12 @@ exports.UserGuildSettingsMap = {
    * @name ClientUserGuildSettings#channelOverrides
    * @type {Collection<ClientUserChannelOverride>}
    */
-  channel_overrides: 'channelOverrides',
+  channel_overrides: 'channelOverrides'
 };
 
 exports.UserChannelOverrideMap = {
-  message_notifications: function messageNotifications(type) { // eslint-disable-line func-name-matching
+  message_notifications: function messageNotifications(type) {
+    // eslint-disable-line func-name-matching
     /**
      * The type of message that should notify you.
      * One of `EVERYTHING`, `MENTIONS`, `NOTHING`, `INHERIT`
@@ -573,7 +557,7 @@ exports.UserChannelOverrideMap = {
    * @name ClientUserChannelOverride#muted
    * @type {boolean}
    */
-  muted: 'muted',
+  muted: 'muted'
 };
 
 /**
@@ -586,7 +570,7 @@ exports.UserChannelOverrideMap = {
 exports.UserFlags = {
   STAFF: 1 << 0,
   PARTNER: 1 << 1,
-  HYPESQUAD: 1 << 2,
+  HYPESQUAD: 1 << 2
 };
 
 exports.ChannelTypes = {
@@ -594,12 +578,12 @@ exports.ChannelTypes = {
   DM: 1,
   VOICE: 2,
   GROUP: 3,
-  CATEGORY: 4,
+  CATEGORY: 4
 };
 
 exports.ClientApplicationAssetTypes = {
   SMALL: 1,
-  BIG: 2,
+  BIG: 2
 };
 
 exports.Colors = {
@@ -629,7 +613,7 @@ exports.Colors = {
   BLURPLE: 0x7289DA,
   GREYPLE: 0x99AAB5,
   DARK_BUT_NOT_BLACK: 0x2C2F33,
-  NOT_QUITE_BLACK: 0x23272A,
+  NOT_QUITE_BLACK: 0x23272A
 };
 
 /**
@@ -722,11 +706,24 @@ exports.APIErrors = {
   CANNOT_EXECUTE_ON_SYSTEM_MESSAGE: 50021,
   BULK_DELETE_MESSAGE_TOO_OLD: 50034,
   INVITE_ACCEPTED_TO_GUILD_NOT_CONTAINING_BOT: 50036,
-  REACTION_BLOCKED: 90001,
+  REACTION_BLOCKED: 90001
 };
 
 function keyMirror(arr) {
-  let tmp = Object.create(null);
-  for (const value of arr) tmp[value] = value;
-  return tmp;
+  var tmp = Object.create(null);
+  for (var _iterator = arr, _isArray = Array.isArray(_iterator), _i = 0, _iterator = _isArray ? _iterator : _iterator[Symbol.iterator]();;) {
+    var _ref4;
+
+    if (_isArray) {
+      if (_i >= _iterator.length) break;
+      _ref4 = _iterator[_i++];
+    } else {
+      _i = _iterator.next();
+      if (_i.done) break;
+      _ref4 = _i.value;
+    }
+
+    var value = _ref4;
+    tmp[value] = value;
+  }return tmp;
 }
